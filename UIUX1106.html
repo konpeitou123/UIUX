@@ -1,0 +1,461 @@
+import React, { useState } from 'react';
+import { ChefHat, Search, Heart, User, Home, BookOpen, Sparkles, Clock, Users, TrendingUp, Globe, Calendar, Utensils, Star, Plus, Share2, Bookmark } from 'lucide-react';
+
+const RecipeApp = () => {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [likedRecipes, setLikedRecipes] = useState(new Set());
+
+  const toggleLike = (recipeId) => {
+    setLikedRecipes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(recipeId)) {
+        newSet.delete(recipeId);
+      } else {
+        newSet.add(recipeId);
+      }
+      return newSet;
+    });
+  };
+
+  // 首頁
+  const HomePage = () => (
+    <div className="space-y-6">
+      {/* 搜尋欄 */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+        <input
+          type="text"
+          placeholder="搜尋食譜、食材..."
+          className="w-full pl-12 pr-4 py-3 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-400"
+        />
+      </div>
+
+      {/* Banner */}
+      <div className="bg-gradient-to-r from-orange-400 to-red-400 rounded-2xl p-6 text-white">
+        <h2 className="text-2xl font-bold mb-2">探索美味料理</h2>
+        <p className="text-sm opacity-90 mb-4">讓 AI 為你推薦最適合的食譜</p>
+        <button 
+          onClick={() => setCurrentPage('ai')}
+          className="bg-white text-orange-500 px-6 py-2 rounded-full font-semibold hover:bg-orange-50 transition"
+        >
+          開始探索
+        </button>
+      </div>
+
+      {/* 快捷分類 */}
+      <div>
+        <h3 className="text-lg font-bold mb-3">快速分類</h3>
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { icon: Globe, label: '國家料理', color: 'bg-blue-100 text-blue-600' },
+            { icon: Calendar, label: '節慶料理', color: 'bg-green-100 text-green-600' },
+            { icon: Utensils, label: '季節料理', color: 'bg-purple-100 text-purple-600' },
+            { icon: TrendingUp, label: '熱門食譜', color: 'bg-red-100 text-red-600' }
+          ].map((item, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentPage('category')}
+              className={`${item.color} p-4 rounded-xl flex flex-col items-center gap-2 hover:scale-105 transition`}
+            >
+              <item.icon size={24} />
+              <span className="text-xs font-medium">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 推薦食譜 */}
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-lg font-bold">為你推薦</h3>
+          <button className="text-orange-500 text-sm font-medium">查看全部</button>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { id: 1, name: '宮保雞丁', time: '30分鐘', difficulty: '中等', image: '🍗' },
+            { id: 2, name: '番茄炒蛋', time: '15分鐘', difficulty: '簡單', image: '🍅' }
+          ].map(recipe => (
+            <RecipeCard key={recipe.id} recipe={recipe} onLike={toggleLike} isLiked={likedRecipes.has(recipe.id)} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // 分類快捷入口頁
+  const CategoryPage = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">分類瀏覽</h2>
+      
+      {/* 國家/地區料理 */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+          <Globe size={20} className="text-blue-600" />
+          國家/地區料理
+        </h3>
+        <div className="grid grid-cols-3 gap-3">
+          {['台灣', '日本', '中國', '墨西哥', '印度', '義大利'].map((country, idx) => (
+            <button key={idx} className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-orange-400 hover:shadow-md transition">
+              <div className="text-2xl mb-2">
+                {idx === 0 ? '🇹🇼' : idx === 1 ? '🇯🇵' : idx === 2 ? '🇨🇳' : idx === 3 ? '🇲🇽' : idx === 4 ? '🇮🇳' : '🇮🇹'}
+              </div>
+              <div className="text-sm font-medium">{country}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 節慶料理 */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+          <Calendar size={20} className="text-green-600" />
+          節慶料理
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { name: '端午節', icon: '🎋' },
+            { name: '中秋節', icon: '🥮' },
+            { name: '春節', icon: '🧧' },
+            { name: '聖誕節', icon: '🎄' }
+          ].map((festival, idx) => (
+            <button key={idx} className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 hover:shadow-md transition text-left">
+              <div className="text-3xl mb-2">{festival.icon}</div>
+              <div className="font-medium">{festival.name}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 季節料理 */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+          <Utensils size={20} className="text-purple-600" />
+          季節料理
+        </h3>
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { season: '春', color: 'from-pink-100 to-green-100', icon: '🌸' },
+            { season: '夏', color: 'from-yellow-100 to-orange-100', icon: '☀️' },
+            { season: '秋', color: 'from-orange-100 to-red-100', icon: '🍂' },
+            { season: '冬', color: 'from-blue-100 to-purple-100', icon: '❄️' }
+          ].map((item, idx) => (
+            <button key={idx} className={`bg-gradient-to-br ${item.color} rounded-xl p-4 hover:shadow-md transition`}>
+              <div className="text-2xl mb-1">{item.icon}</div>
+              <div className="text-sm font-medium">{item.season}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // AI推薦食譜頁
+  const AIRecommendPage = () => (
+    <div className="space-y-6">
+      <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+        <div className="flex items-center gap-2 mb-2">
+          <Sparkles size={24} />
+          <h2 className="text-2xl font-bold">AI 智能推薦</h2>
+        </div>
+        <p className="text-sm opacity-90">根據你的喜好和烹飪習慣推薦</p>
+      </div>
+
+      {/* 推薦理由 */}
+      <div className="bg-purple-50 rounded-xl p-4">
+        <h3 className="font-semibold mb-2 text-purple-900">為什麼推薦這些食譜？</h3>
+        <ul className="space-y-2 text-sm text-purple-800">
+          <li className="flex items-start gap-2">
+            <span className="text-purple-500">•</span>
+            <span>根據你最近瀏覽的台灣料理</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-purple-500">•</span>
+            <span>烹飪時間符合你的偏好（30分鐘內）</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-purple-500">•</span>
+            <span>難度適中，適合你的技術水平</span>
+          </li>
+        </ul>
+      </div>
+
+      {/* 推薦食譜列表 */}
+      <div className="space-y-4">
+        {[
+          { id: 3, name: '三杯雞', time: '25分鐘', difficulty: '中等', image: '🍗', match: '95%' },
+          { id: 4, name: '紅燒牛肉麵', time: '40分鐘', difficulty: '中等', image: '🍜', match: '92%' },
+          { id: 5, name: '麻婆豆腐', time: '20分鐘', difficulty: '簡單', image: '🌶️', match: '88%' }
+        ].map(recipe => (
+          <div key={recipe.id} className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition">
+            <div className="flex gap-4">
+              <div className="text-6xl">{recipe.image}</div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-bold text-lg">{recipe.name}</h4>
+                  <span className="bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-semibold">
+                    匹配 {recipe.match}
+                  </span>
+                </div>
+                <div className="flex gap-4 text-sm text-gray-600 mb-3">
+                  <span className="flex items-center gap-1">
+                    <Clock size={14} /> {recipe.time}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Star size={14} /> {recipe.difficulty}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => setCurrentPage('detail')}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg font-medium hover:shadow-lg transition"
+                >
+                  查看食譜
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // 食譜詳細頁
+  const RecipeDetailPage = () => (
+    <div className="space-y-6 pb-20">
+      {/* 食譜圖片 */}
+      <div className="relative -mx-6 -mt-6">
+        <div className="bg-gradient-to-br from-orange-200 to-red-200 h-64 flex items-center justify-center text-8xl">
+          🍗
+        </div>
+        <button className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg">
+          <Share2 size={20} />
+        </button>
+      </div>
+
+      {/* 食譜標題 */}
+      <div>
+        <div className="flex justify-between items-start mb-3">
+          <h2 className="text-2xl font-bold">宮保雞丁</h2>
+          <button 
+            onClick={() => toggleLike(1)}
+            className={`p-2 rounded-full ${likedRecipes.has(1) ? 'bg-red-100' : 'bg-gray-100'}`}
+          >
+            <Heart size={24} className={likedRecipes.has(1) ? 'fill-red-500 text-red-500' : 'text-gray-400'} />
+          </button>
+        </div>
+        <div className="flex gap-4 text-sm text-gray-600">
+          <span className="flex items-center gap-1">
+            <Clock size={16} /> 30分鐘
+          </span>
+          <span className="flex items-center gap-1">
+            <Users size={16} /> 2-3人份
+          </span>
+          <span className="flex items-center gap-1">
+            <Star size={16} /> 中等難度
+          </span>
+        </div>
+      </div>
+
+      {/* 食材列表 */}
+      <div className="bg-orange-50 rounded-xl p-4">
+        <h3 className="font-bold mb-3 flex items-center gap-2">
+          <BookOpen size={20} className="text-orange-600" />
+          食材清單
+        </h3>
+        <div className="space-y-2 text-sm">
+          {['雞胸肉 300g', '花生 50g', '乾辣椒 10條', '蔥 2根', '薑 15g', '蒜 4瓣', '醬油 2大匙', '糖 1大匙', '醋 1大匙'].map((ingredient, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+              <span>{ingredient}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 烹飪步驟 */}
+      <div>
+        <h3 className="font-bold mb-3 flex items-center gap-2">
+          <ChefHat size={20} className="text-orange-600" />
+          烹飪步驟
+        </h3>
+        <div className="space-y-4">
+          {[
+            '雞胸肉切丁，用醬油、米酒、太白粉醃製15分鐘',
+            '熱鍋下油，先炒香花生後取出備用',
+            '下雞丁快炒至變色後取出',
+            '爆香乾辣椒、蔥薑蒜',
+            '加入調好的醬汁煮滾',
+            '放回雞丁和花生，快速拌炒均勻即可'
+          ].map((step, idx) => (
+            <div key={idx} className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">
+                {idx + 1}
+              </div>
+              <p className="flex-1 pt-1">{step}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 小提醒 */}
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+        <h4 className="font-semibold text-yellow-800 mb-2">💡 烹飪小技巧</h4>
+        <p className="text-sm text-yellow-700">炒雞丁時火候要大，動作要快，才能保持雞肉的嫩度。醬汁可以先調好備用，翻炒時會更順手。</p>
+      </div>
+    </div>
+  );
+
+  // 我的食譜頁
+  const MyRecipesPage = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">我的食譜</h2>
+        <button className="bg-orange-500 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-orange-600 transition">
+          <Plus size={20} />
+          新增食譜
+        </button>
+      </div>
+
+      {/* 統計資訊 */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: '收藏食譜', count: likedRecipes.size, color: 'bg-red-100 text-red-600' },
+          { label: '自建食譜', count: 5, color: 'bg-blue-100 text-blue-600' },
+          { label: '最近瀏覽', count: 12, color: 'bg-green-100 text-green-600' }
+        ].map((stat, idx) => (
+          <div key={idx} className={`${stat.color} rounded-xl p-4 text-center`}>
+            <div className="text-2xl font-bold">{stat.count}</div>
+            <div className="text-xs mt-1">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tab 切換 */}
+      <div className="flex gap-2 border-b">
+        {['收藏清單', '自建食譜', '最近瀏覽'].map((tab, idx) => (
+          <button key={idx} className={`px-4 py-2 font-medium ${idx === 0 ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-500'}`}>
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* 收藏的食譜 */}
+      <div className="space-y-3">
+        {likedRecipes.size > 0 ? (
+          Array.from(likedRecipes).map(id => (
+            <div key={id} className="bg-white border rounded-xl p-4 flex gap-4 hover:shadow-md transition">
+              <div className="text-5xl">🍗</div>
+              <div className="flex-1">
+                <h4 className="font-bold mb-1">宮保雞丁</h4>
+                <div className="flex gap-3 text-xs text-gray-600 mb-2">
+                  <span>⏱️ 30分鐘</span>
+                  <span>⭐ 中等</span>
+                </div>
+                <button 
+                  onClick={() => setCurrentPage('detail')}
+                  className="text-orange-500 text-sm font-medium"
+                >
+                  查看食譜 →
+                </button>
+              </div>
+              <button className="text-gray-400 hover:text-red-500">
+                <Heart size={20} className="fill-red-500 text-red-500" />
+              </button>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-12 text-gray-400">
+            <Bookmark size={48} className="mx-auto mb-3 opacity-50" />
+            <p>還沒有收藏的食譜</p>
+            <p className="text-sm mt-1">開始探索並收藏你喜歡的食譜吧！</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // 食譜卡片組件
+  const RecipeCard = ({ recipe, onLike, isLiked }) => (
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition">
+      <div className="bg-gradient-to-br from-orange-100 to-red-100 h-32 flex items-center justify-center text-5xl relative">
+        {recipe.image}
+        <button 
+          onClick={() => onLike(recipe.id)}
+          className="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow"
+        >
+          <Heart size={16} className={isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'} />
+        </button>
+      </div>
+      <div className="p-3">
+        <h4 className="font-bold mb-2">{recipe.name}</h4>
+        <div className="flex justify-between text-xs text-gray-600 mb-3">
+          <span className="flex items-center gap-1">
+            <Clock size={12} /> {recipe.time}
+          </span>
+          <span className="flex items-center gap-1">
+            <Star size={12} /> {recipe.difficulty}
+          </span>
+        </div>
+        <button 
+          onClick={() => setCurrentPage('detail')}
+          className="w-full bg-orange-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition"
+        >
+          查看食譜
+        </button>
+      </div>
+    </div>
+  );
+
+  // 底部導航欄
+  const BottomNav = () => (
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
+      <div className="max-w-2xl mx-auto flex justify-around py-3">
+        {[
+          { icon: Home, label: '首頁', page: 'home' },
+          { icon: Globe, label: '分類', page: 'category' },
+          { icon: Sparkles, label: 'AI推薦', page: 'ai' },
+          { icon: BookOpen, label: '我的', page: 'my' }
+        ].map((item, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentPage(item.page)}
+            className={`flex flex-col items-center gap-1 px-4 ${currentPage === item.page ? 'text-orange-500' : 'text-gray-400'}`}
+          >
+            <item.icon size={24} />
+            <span className="text-xs">{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="max-w-2xl mx-auto bg-gray-50 min-h-screen">
+      {/* 頂部導航欄 */}
+      <div className="bg-white shadow-sm p-4 sticky top-0 z-10">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <ChefHat className="text-orange-500" size={28} />
+            <h1 className="text-xl font-bold">美味食譜</h1>
+          </div>
+          <button className="p-2 hover:bg-gray-100 rounded-full">
+            <User size={24} className="text-gray-600" />
+          </button>
+        </div>
+      </div>
+
+      {/* 主要內容區 */}
+      <div className="p-6 pb-24">
+        {currentPage === 'home' && <HomePage />}
+        {currentPage === 'category' && <CategoryPage />}
+        {currentPage === 'ai' && <AIRecommendPage />}
+        {currentPage === 'detail' && <RecipeDetailPage />}
+        {currentPage === 'my' && <MyRecipesPage />}
+      </div>
+
+      {/* 底部導航 */}
+      <BottomNav />
+    </div>
+  );
+};
+
+export default RecipeApp;
